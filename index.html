@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Star Catcher!</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      color: #24304a;
+      background: linear-gradient(145deg, #a8e6ff, #d8c6ff 55%, #ffe0f0);
+    }
+
+    .game {
+      width: min(760px, 100%);
+      padding: 28px;
+      border: 5px solid white;
+      border-radius: 30px;
+      background: #ffffffed;
+      box-shadow: 0 18px 50px #44338830;
+      text-align: center;
+    }
+
+    h1 { margin: 0; color: #6548d8; font-size: clamp(2rem, 7vw, 3.5rem); }
+    .hud { display: flex; justify-content: center; gap: 12px; margin: 14px 0; flex-wrap: wrap; }
+    .badge { padding: 9px 16px; border-radius: 99px; background: #f0ebff; font-weight: bold; }
+
+    #board {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      height: min(48vh, 360px);
+      min-height: 250px;
+      border: 4px solid white;
+      border-radius: 22px;
+      background: linear-gradient(#8adfff, #d5f8ff 75%, #b2edbb 75%);
+      box-shadow: inset 0 0 0 2px #b5a6ff;
+      touch-action: manipulation;
+    }
+
+    #player {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 4rem;
+      user-select: none;
+    }
+
+    .thing { position: absolute; top: -50px; font-size: 2rem; pointer-events: none; }
+
+    button {
+      border: 0;
+      border-radius: 99px;
+      padding: 13px 24px;
+      margin: 5px;
+      color: white;
+      background: #6c5ce7;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #message { min-height: 1.5em; font-weight: bold; }
+    .hint { color: #58647a; font-size: .92rem; }
+  </style>
+</head>
+<body>
+  <main class="game">
+    <h1>⭐ Star Catcher! ⭐</h1>
+    <p>Catch the stars in your basket. Watch out for raindrops!</p>
+
+    <div class="hud">
+      <span class="badge">⭐ Stars: <b id="score">0</b></span>
+      <span class="badge">💧 Misses: <b id="misses">0</b> / 5</span>
+    </div>
+
+    <div id="board">
+      <span style="position:absolute;left:10%;top:12px;font-size:2.4rem">☁️</span>
+      <span style="position:absolute;right:12%;top:35px;font-size:2.4rem">☁️</span>
+      <div id="player">🧺</div>
+    </div>
+
+    <button id="start">Start game</button>
+    <button id="left">⬅️ Move left</button>
+    <button id="right">Move right ➡️</button>
+
+    <p id="message">Ready? Catch 10 stars to win!</p>
+    <p class="hint">Use the arrow keys or buttons, or tap the left or right side of the sky.</p>
+  </main>
+
+  <script>
+    const board = document.querySelector("#board");
+    const player = document.querySelector("#player");
+    const scoreEl = document.querySelector("#score");
+    const missesEl = document.querySelector("#misses");
+    const message = document.querySelector("#message");
+
+    let x = 0.5;
+    let score = 0;
+    let misses = 0;
+    let running = false;
+    let dropTimer;
+    let objects = [];
+
+    function move(amount) {
+      x = Math.max(0.08, Math.min(0.92, x + amount));
+      player.style.left = (x * 100) + "%";
+    }
+
+    function clearThings() {
+      objects.forEach(item => item.el.remove());
+      objects = [];
+    }
+
+    function endGame(won) {
+      running = false;
+      clearInterval(dropTimer);
+      clearThings();
+      message.textContent = won
+        ? "Amazing! You caught 10 stars! 🎉"
+        : "Good try! Press Start game to play again. 🌈";
+    }
+
+    function dropThing() {
+      if (!running) return;
+
+      const isStar = Math.random() < 0.72;
+      const el = document.createElement("span");
+      el.className = "thing";
+      el.textContent = isStar ? "⭐" : "💧";
+
+      const item = {
+        el,
+        x: 0.06 + Math.random() * 0.88,
+        y: -40,
+        speed: 1.5 + Math.random() * 1.5,
+        isStar
+      };
+
+      el.style.left = (item.x * 100) + "%";
+      board.appendChild(el);
+      objects.push(item);
+    }
+
+    function updateGame() {
+      if (!running) return;
+
+      const height = board.clientHeight;
+      const basketX = board.clientWidth * x;
+
+      objects = objects.filter(item => {
+        item.y += item.speed;
+        item.el.style.top = item.y + "px";
+
+        const itemX = board.clientWidth * item.x;
+
+        if (item.y > height - 65 && item.y < height - 5 &&
+            Math.abs(itemX - basketX) < 58) {
+          item.el.remove();
+
+          if (item.isStar) {
+            score++;
+            scoreEl.textContent = score;
+            if (score >= 10) endGame(true);
+          }
+
+          return false;
+        }
+
+        if (item.y >= height - 20) {
+          item.el.remove();
+
+          if (item.isStar) {
+            misses++;
+            missesEl.textContent = misses;
+            if (misses >= 5) endGame(false);
+          }
+
+          return false;
+        }
+
+        return true;
+      });
+    }
+
+    function startGame() {
+      clearInterval(dropTimer);
+      clearThings();
+
+      score = 0;
+      misses = 0;
+      x = 0.5;
+      running = true;
+
+      scoreEl.textContent = "0";
+      missesEl.textContent = "0";
+      player.style.left = "50%";
+      message.textContent = "Here they come!";
+
+      dropTimer = setInterval(dropThing, 850);
+    }
+
+    document.querySelector("#start").addEventListener("click", startGame);
+    document.querySelector("#left").addEventListener("click", () => move(-0.12));
+    document.querySelector("#right").addEventListener("click", () => move(0.12));
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        move(-0.06);
+      }
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        move(0.06);
+      }
+    });
+
+    board.addEventListener("pointerdown", event => {
+      const bounds = board.getBoundingClientRect();
+      move(event.clientX < bounds.left + bounds.width / 2 ? -0.12 : 0.12);
+    });
+
+    setInterval(updateGame, 20);
+  </script>
+</body>
+</html>

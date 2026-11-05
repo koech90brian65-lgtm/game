@@ -1,0 +1,122 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  color: #24304a;
+  background: linear-gradient(145deg, #a8e6ff, #d8c6ff 55%, #ffe0f0);
+}
+
+.game {
+  width: min(760px, 100%);
+  padding: 28px;
+  border: 5px solid white;
+  border-radius: 30px;
+  background: #ffffffed;
+  box-shadow: 0 18px 50px #44338830;
+  text-align: center;
+}
+
+h1 {
+  margin: 0;
+  color: #6548d8;
+  font-size: clamp(2rem, 7vw, 3.5rem);
+}
+
+.scoreboard {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+
+.scoreboard span {
+  padding: 10px 16px;
+  border-radius: 99px;
+  background: #f0ebff;
+  font-weight: bold;
+}
+
+#board {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: min(48vh, 360px);
+  min-height: 250px;
+  border: 4px solid white;
+  border-radius: 22px;
+  background: linear-gradient(#8adfff, #d5f8ff 75%, #b2edbb 75%);
+  box-shadow: inset 0 0 0 2px #b5a6ff;
+  touch-action: manipulation;
+}
+
+.cloud {
+  position: absolute;
+  top: 15px;
+  font-size: 2.4rem;
+  pointer-events: none;
+}
+
+.cloud-one {
+  left: 10%;
+}
+
+.cloud-two {
+  right: 12%;
+  top: 35px;
+}
+
+#player {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 4rem;
+  user-select: none;
+}
+
+.falling {
+  position: absolute;
+  top: -45px;
+  font-size: 2rem;
+  user-select: none;
+  pointer-events: none;
+}
+
+button {
+  margin: 5px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 99px;
+  color: white;
+  background: #6c5ce7;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #5542ce;
+}
+
+button:focus-visible {
+  outline: 3px solid #ffb703;
+  outline-offset: 3px;
+}
+
+#message {
+  min-height: 1.5em;
+  font-weight: bold;
+}
+
+.hint {
+  color: #58647a;
+  font-size: 0.92rem;
+}
